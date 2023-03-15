@@ -263,7 +263,17 @@ pub fn read_catalog(file_hash: &Blake3Hash) -> Result<Vec<BaoHash>> {
 }
 
 pub fn delete_file(file_hash: &Blake3Hash) -> Result<()> {
-    let path = SYS_CFG
+    let segment_path = SYS_CFG
+        .volumes
+        .get(0)
+        .expect("First volume present")
+        .path
+        .join(SEGMENT_DIR)
+        .join(file_hash.to_string());
+
+    fs::remove_file(segment_path)?;
+
+    let catalog_path = SYS_CFG
         .volumes
         .get(0)
         .expect("First volume present")
@@ -271,7 +281,7 @@ pub fn delete_file(file_hash: &Blake3Hash) -> Result<()> {
         .join(CATALOG_DIR)
         .join(file_hash.to_string());
 
-    fs::remove_file(path)?;
+    fs::remove_file(catalog_path)?;
 
     Ok(())
 }
