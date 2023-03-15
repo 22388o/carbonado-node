@@ -262,6 +262,21 @@ pub fn read_catalog(file_hash: &Blake3Hash) -> Result<Vec<BaoHash>> {
     Ok(bao_hashes)
 }
 
+pub fn read_slice(file_hash: &Blake3Hash) -> Result<()> {
+    let path = SYS_CFG
+        .volumes
+        .get(0)
+        .expect("First volume present")
+        .path
+        .join(CATALOG_DIR)
+        .join(file_hash.to_string());
+
+    trace!("Read slice at {}", path.to_string_lossy());
+    let mut file = OpenOptions::new().read(true).open(path)?;
+
+    Ok(())
+}
+
 pub fn delete_file(file_hash: &Blake3Hash) -> Result<()> {
     let path = SYS_CFG
         .volumes

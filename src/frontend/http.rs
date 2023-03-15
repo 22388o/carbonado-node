@@ -13,7 +13,7 @@ use log::info;
 use tower_http::cors::CorsLayer;
 
 use crate::{
-    backend::fs::{delete_file, read_file, write_file},
+    backend::fs::{delete_file, read_file, read_slice, write_file},
     prelude::*,
 };
 
@@ -40,11 +40,23 @@ async fn remove_file(Path(blake3_hash): Path<String>) -> Result<impl IntoRespons
     Ok(())
 }
 
+#[axum_macros::debug_handler]
+async fn get_slice(Path(blake3_hash): Path<String>) -> Result<impl IntoResponse, AppError> {
+    let blake3_hash = Blake3Hash(blake3::Hash::from_str(&blake3_hash)?);
+    let file_bytes = read_slice(&blake3_hash).await?;
+
+    Ok((StatusCode::OK, file_bytes))
+}
+
 pub async fn start() -> Result<()> {
     let app = Router::new()
         .route("/remove/:blake3_hash", delete(remove_file))
         .route("/upload/:pk", post(post_file))
         .route("/file/:blake3_hash", get(get_file))
+        .route(
+            "/slice/:blake3_hash/:slice_index/:slice_range",
+            get(get_slice),
+        )
         // .route("/catalog/:blake3_hash", get(get_catalog))
         // .route("/raw/:bao_hash", get(get_raw))
         .layer(CorsLayer::permissive());
