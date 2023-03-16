@@ -266,12 +266,13 @@ pub fn delete_file(file_hash: &Blake3Hash) -> Result<()> {
     let segment_path = SYS_CFG
         .volumes
         .get(0)
-        .expect("First volume present")
+        .expect("Iterate through all segments")
         .path
         .join(SEGMENT_DIR)
         .join(file_hash.to_string());
 
-    fs::remove_file(segment_path)?;
+    // remove all segments
+    fs::remove_dir_all(segment_path)?;
 
     let catalog_path = SYS_CFG
         .volumes
