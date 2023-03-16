@@ -1,9 +1,9 @@
-use std::fs;
+use std::{fs, str::FromStr};
 
 use anyhow::Result;
 use carbonado_node::{
-    backend::fs::{delete_file, write_file},
-    structs::Secp256k1PubKey,
+    backend::fs::{delete_file, read_file, write_file},
+    structs::{Blake3Hash, Secp256k1PubKey},
 };
 use log::{debug, info};
 use rand::thread_rng;
@@ -71,9 +71,12 @@ async fn delete_file_if_exists() -> Result<()> {
 
     info!("Writing file if not exists in order to test delete");
     let blake3_hash = write_file(Secp256k1PubKey(pk), &file_bytes).await;
+    info!("Reading file by hash");
+    let new_file_bytes = delete_file(&blake3_hash).await?;
+    debug!("{} new bytes read", new_file_bytes.len());
 
-    let deleted_file = delete_file(&blake3_hash).is_ok()?;
-    assert!(deleted_file);
+    //let deleted_file = delete_file(&blake3_hash).is_ok()?;
+    assert!(new_file_bytes, "{}", 0);
 
     Ok(())
 }
