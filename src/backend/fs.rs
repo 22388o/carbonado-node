@@ -262,17 +262,21 @@ pub fn read_catalog(file_hash: &Blake3Hash) -> Result<Vec<BaoHash>> {
     Ok(bao_hashes)
 }
 
-pub fn delete_file(file_hash: &Blake3Hash) -> Result<()> {
-    let segment_path = SYS_CFG
-        .volumes
-        .get(0)
-        .expect("Iterate through all segments")
-        .path
-        .join(SEGMENT_DIR)
-        .join(file_hash.to_string());
+pub fn delete_file(pk: Secp256k1PubKey, file_bytes: &[u8]) -> Result<()> {
+    let pk_bytes = pk.to_bytes();
+    let (x_only_pk, _) = pk.into_inner().x_only_public_key();
+
+    let file_hash = Blake3Hash(blake3::keyed_hash(&x_only_pk.serialize(), file_bytes));
+    // let segment_path = SYS_CFG
+    //     .volumes
+    //     .get(0)
+    //     .expect("Iterate through all segments")
+    //     .path
+    //     .join(SEGMENT_DIR)
+    //     .join(file_hash.to_string());
 
     // remove all segments
-    fs::remove_dir_all(segment_path)?;
+    // fs::remove_dir_all(segment_path)?;
 
     let catalog_path = SYS_CFG
         .volumes
@@ -281,6 +285,11 @@ pub fn delete_file(file_hash: &Blake3Hash) -> Result<()> {
         .path
         .join(CATALOG_DIR)
         .join(file_hash.to_string());
+
+    trace!(
+        "Delete_File Read catalog at {}",
+        catalog_path.to_string_lossy()
+    );
 
     fs::remove_file(catalog_path)?;
 

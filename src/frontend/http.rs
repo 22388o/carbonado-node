@@ -34,8 +34,8 @@ async fn get_file(Path(blake3_hash): Path<String>) -> Result<impl IntoResponse, 
 
 #[axum_macros::debug_handler]
 async fn remove_file(Path(blake3_hash): Path<String>) -> Result<impl IntoResponse, AppError> {
-    let blake3_hash = Blake3Hash(blake3::Hash::from_str(&blake3_hash)?);
-    delete_file(&blake3_hash)?;
+    let _blake3_hash = Blake3Hash(blake3::Hash::from_str(&blake3_hash)?);
+    // delete_file(&blake3_hash)?;
 
     Ok(())
 }
