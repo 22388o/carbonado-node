@@ -51,7 +51,7 @@ async fn check_catalog_exists() -> Result<()> {
     debug!("{} bytes read", file_bytes.len());
 
     info!("Writing file if not exists");
-    let blake3_hash = write_file(Secp256k1PubKey(pk), &file_bytes).await.is_err();
+    let blake3_hash = write_file(&Secp256k1PubKey(pk), &file_bytes).await.is_err();
     debug!("Skip writing file as File hash exists: {blake3_hash}");
     assert!(blake3_hash);
 
@@ -69,7 +69,7 @@ async fn write_delete_file() -> Result<()> {
     debug!("{} Write Delete:: bytes read", file_bytes.len());
 
     // info!("Write Delete:: Writing file if not exists in order to test delete");
-    let blake3_hash = write_file(Secp256k1PubKey(pk), &file_bytes).await.is_err();
+    let blake3_hash = write_file(&Secp256k1PubKey(pk), &file_bytes).await.is_err();
     info!("Write Delete:: blake3_hash:: {} ", blake3_hash.to_string());
     let new_file_bytes = delete_file(Secp256k1PubKey(pk), &file_bytes).is_err();
     debug!("Write Delete:: deleted file:: {:?}", new_file_bytes);
